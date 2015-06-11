@@ -1,4 +1,5 @@
 #include "pse.h"
+#include "defs.h"
 
 #define    CMD      "serveur"
 
