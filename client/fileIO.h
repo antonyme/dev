@@ -5,6 +5,6 @@
  * Remplit la structure décrivant le client (me) à partir du ficher de
  * sauvegarde (fileName)
  */
-void fillInfos (ACHETEUR *me, char *fileName);
+void fillInfos (ACHETEUR *me, char *name);
 
 #endif

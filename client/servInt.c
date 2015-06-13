@@ -34,3 +34,39 @@ int connectToServ(char machine[], char port[]) {
 	freeResolv();
 	return sd;
 }
+
+int waitACK (int sd) {
+	int ret;
+	char buf[LIGNE_MAX];
+	
+	while ((ret = lireLigne(sd, buf)) == 0);
+	if (ret == -1) {
+		erreur_IO("lireLigne");
+	}
+	else if (ret == LIGNE_MAX) {
+		erreur("line too long\n");
+	}
+	if (strcmp(buf, "OK") == 0) {
+		return 0;
+	}
+	return -1;
+}
+
+void joinRoom (int sd, ACHETEUR* info) {
+	int ret;
+	char buf[LIGNE_MAX];
+	
+	strcpy(buf, info->nom);
+	ret = ecrireLigne(sd, buf);
+	if (ret == -1) {
+		erreur_IO("ecrireLigne");
+	}
+	printf("%s: joining room \n\tsent: %s\t%d octets\n", CMD, buf, ret);
+
+	if (waitACK(sd) == 0) {
+		printf("%s: accepted\n", CMD);
+	}
+	else {
+		erreur("bad answer from server: %s\n", buf);
+	}
+}

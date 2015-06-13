@@ -6,6 +6,14 @@
 #include "defs.h"
 #include "fileIO.h"
 
-void fillInfos (ACHETEUR *me, char *fileName) {
+void fillInfos (ACHETEUR *me, char *name) {
+	FILE *fp;
+	char fileName[TMAX] = "./../data/clients/";
 	
+	strcat(fileName, name);
+	fp = fopen(fileName, "r");
+	if (fp == NULL) {
+		erreur_IO("open");
+	}
+	fread(me, sizeof(ACHETEUR), 1, fp);
 }
