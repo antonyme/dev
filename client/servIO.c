@@ -44,7 +44,7 @@ void sendServ (int sd, const char* line) {
 	if (ret == -1) {
 		erreur_IO("sendServ - ecrireLigne");
 	}
-	printf("\tsent: %s\n\t%d octets\n", CMD, line, ret);
+	printf("\tsent: %s\n\t%d octets\n", line, ret);
 
 	while ((ret = lireLigne(sd, buf)) == 0);
 	if (ret == -1) {
