@@ -61,13 +61,13 @@ void sendServ (int sd, const char* format, ...) {
 		printf("\tserver: received\n");
 	}
 	else {
-		erreur("sendServ - bad answer from server: %s\n", buf);
+		erreur("bad answer from server: %s\n", buf);
 	}
 }
 
 void recvServ (int sd, char* buf) {
 	int ret;
-	char buff[LIGNE_MAX] = "OK";
+	char bufRep[LIGNE_MAX] = "OK";
 	
 	while ((ret = lireLigne(sd, buf)) == 0);
 	if (ret == -1) {
@@ -77,7 +77,7 @@ void recvServ (int sd, char* buf) {
 		erreur("line too long");
 	}
 	printf("\tserver: \"%s\"\n", buf);
-	ret = ecrireLigne(sd, buff);
+	ret = ecrireLigne(sd, bufRep);
 	if (ret == -1) {
 		erreur_IO("ecrireLigne");
 	}
