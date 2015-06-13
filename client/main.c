@@ -7,6 +7,7 @@
 
 int main(int argc, char *argv[]) {
 	int sd;
+	char* buf[TMAX];
 	ACHETEUR myInfos;
 	
 	signal(SIGPIPE, SIG_IGN);
@@ -26,4 +27,3 @@ int main(int argc, char *argv[]) {
 	
 	exit(EXIT_SUCCESS);
 }
-

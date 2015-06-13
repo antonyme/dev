@@ -46,22 +46,38 @@ void sendServ (int sd, const char* format, ...) {
 	va_end (args);
 	ret = ecrireLigne(sd, buf);
 	if (ret == -1) {
-		erreur_IO("sendServ - ecrireLigne");
+		erreur_IO("ecrireLigne");
 	}
 	printf("\tsent: %s\t%d octets\n", buf, ret);
 
 	while ((ret = lireLigne(sd, buf)) == 0);
 	if (ret == -1) {
-		erreur_IO("sendServ - lireLigne");
+		erreur_IO("lireLigne");
 	}
 	else if (ret == LIGNE_MAX) {
-		erreur("sendServ - line too long\n");
+		erreur("line too long\n");
 	}
 	if (strcmp(buf, "OK") == 0) {
-		printf("\treceived\n");
+		printf("\tserver: received\n");
 	}
 	else {
 		erreur("sendServ - bad answer from server: %s\n", buf);
 	}
 }
 
+void recvServ (int sd, char* buf) {
+	int ret;
+	
+	while ((ret = lireLigne(sd, buf)) == 0);
+	if (ret == -1) {
+		erreur_IO("lireLigne");
+	}
+	else if (ret == LIGNE_MAX) {
+		erreur("line too long");
+	}
+	printf("\tserver: \"%s\"\n", buf);
+	ret = ecrireLigne(sd, "OK");
+	if (ret == -1) {
+		erreur_IO("ecrireLigne");
+	}
+}
