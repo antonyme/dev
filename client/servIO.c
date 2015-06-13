@@ -4,7 +4,7 @@
  */
 #include "pse.h"
 #include "defs.h"
-#include "servInt.h"
+#include "servIO.h"
 
 int connectToServ(char machine[], char port[]) {
 	struct sockaddr_in *sa;
@@ -35,38 +35,29 @@ int connectToServ(char machine[], char port[]) {
 	return sd;
 }
 
-int waitACK (int sd) {
+void sendServ (int sd, const char* line) {
 	int ret;
 	char buf[LIGNE_MAX];
 	
-	while ((ret = lireLigne(sd, buf)) == 0);
-	if (ret == -1) {
-		erreur_IO("lireLigne");
-	}
-	else if (ret == LIGNE_MAX) {
-		erreur("line too long\n");
-	}
-	if (strcmp(buf, "OK") == 0) {
-		return 0;
-	}
-	return -1;
-}
-
-void joinRoom (int sd, ACHETEUR* info) {
-	int ret;
-	char buf[LIGNE_MAX];
-	
-	strcpy(buf, info->nom);
+	strcpy(buf, line);
 	ret = ecrireLigne(sd, buf);
 	if (ret == -1) {
-		erreur_IO("ecrireLigne");
+		erreur_IO("sendServ - ecrireLigne");
 	}
-	printf("%s: joining room \n\tsent: %s\t%d octets\n", CMD, buf, ret);
+	printf("\tsent: %s\n\t%d octets\n", CMD, line, ret);
 
-	if (waitACK(sd) == 0) {
-		printf("%s: accepted\n", CMD);
+	while ((ret = lireLigne(sd, buf)) == 0);
+	if (ret == -1) {
+		erreur_IO("sendServ - lireLigne");
+	}
+	else if (ret == LIGNE_MAX) {
+		erreur("sendServ - line too long\n");
+	}
+	if (strcmp(buf, "OK") == 0) {
+		printf("\treceived\n");
 	}
 	else {
-		erreur("bad answer from server: %s\n", buf);
+		erreur("sendServ - bad answer from server: %s\n", buf);
 	}
 }
+

@@ -1,7 +1,7 @@
 #include "pse.h"
 #include "defs.h"
 #include "main.h"
-#include "servInt.h"
+#include "servIO.h"
 #include "auction.h"
 #include "fileIO.h"
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 	}
 	sd = connectToServ(argv[1], argv[2]);
 	fillInfos(&myInfos, argv[3]);
-	joinRoom(sd, &myInfos);
+	sendServ(sd, myInfos.nom);
 	
 	if (close(sd) == -1) {
 		erreur_IO("close");
