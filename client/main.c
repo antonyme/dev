@@ -1,3 +1,6 @@
+/*
+ * Client - main
+ */
 #include "pse.h"
 #include "defs.h"
 #include "main.h"
@@ -7,7 +10,7 @@
 
 int main(int argc, char *argv[]) {
 	int sd;
-	char* buf[TMAX];
+	char buf[LIGNE_MAX];
 	ACHETEUR myInfos;
 	
 	signal(SIGPIPE, SIG_IGN);
@@ -20,6 +23,7 @@ int main(int argc, char *argv[]) {
 	fillInfos(&myInfos, argv[3]);
 	printf("%s: joining auction\n", CMD);
 	sendServ(sd, myInfos.nom);
+	recvServ(sd, buf);
 	
 	if (close(sd) == -1) {
 		erreur_IO("close");

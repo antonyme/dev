@@ -1,42 +1,44 @@
 /* 
- * Module de gestion de la connection au serveur et de la
+ * Module de gestion de la connection au client et de la
  * communication avec celui-ci.
  */
 #include <stdarg.h>
 #include "pse.h"
 #include "defs.h"
-#include "servIO.h"
+#include "clientIO.h"
 
-int connectToServ(char machine[], char port[]) {
-	struct sockaddr_in *sa;
-	int sd, ret;
+int createEcoute (char strPort[]) {
+	int ecoute, ret;
+	struct sockaddr_in adrEcoute;
+	short port;
+	
+	port = (short) atoi(strPort);
 	
 	printf("%s: creating a socket\n", CMD);
-	sd = socket (AF_INET, SOCK_STREAM, 0);
-	if (sd < 0) {
+	ecoute = socket (AF_INET, SOCK_STREAM, 0);
+	if (ecoute < 0) {
 		erreur_IO("socket");
 	}
 	
-	printf("%s: DNS resolving for %s, port %s\n", CMD, machine, port);
-	sa = resolv(machine, port);
-	if (sa == NULL) {
-		erreur("adresse %s port %s inconnus\n", machine, port);
-	}
-	printf("%s: adr %s, port %hu\n", CMD,
-			stringIP(ntohl(sa->sin_addr.s_addr)),
-			ntohs(sa->sin_port));
-	
-	printf("%s: connecting the socket\n", CMD);
-	ret = connect(sd, (struct sockaddr *) sa, sizeof(struct sockaddr_in));
+	adrEcoute.sin_family = AF_INET;
+	adrEcoute.sin_addr.s_addr = INADDR_ANY;
+	adrEcoute.sin_port = htons(port);
+	printf("%s: binding to INADDR_ANY address on port %d\n", CMD, port);
+	ret = bind (ecoute,  (struct sockaddr *) &adrEcoute, sizeof(adrEcoute));
 	if (ret < 0) {
-		erreur_IO("Connect");
+		erreur_IO("bind");
 	}
-
-	freeResolv();
-	return sd;
+	
+	printf("%s: listening to socket\n", CMD);
+	ret = listen (ecoute, 5);
+	if (ret < 0) {
+		erreur_IO("listen");
+	}
+	
+	return ecoute;
 }
 
-void sendServ (int sd, const char* format, ...) {
+void sendCli (int sd, const char* format, ...) {
 	int ret;
 	char buf[LIGNE_MAX];
 	va_list args;
@@ -61,11 +63,11 @@ void sendServ (int sd, const char* format, ...) {
 		printf("\tserver: received\n");
 	}
 	else {
-		erreur("sendServ - bad answer from server: %s\n", buf);
+		erreur("sendServ - bad answer from client: %s\n", buf);
 	}
 }
 
-void recvServ (int sd, char* buf) {
+void recvCli (int sd, char* buf) {
 	int ret;
 	char buff[LIGNE_MAX] = "OK";
 	
@@ -76,7 +78,7 @@ void recvServ (int sd, char* buf) {
 	else if (ret == LIGNE_MAX) {
 		erreur("line too long");
 	}
-	printf("\tserver: \"%s\"\n", buf);
+	printf("\tclient: \"%s\"\n", buf);
 	ret = ecrireLigne(sd, buff);
 	if (ret == -1) {
 		erreur_IO("ecrireLigne");
