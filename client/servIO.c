@@ -2,6 +2,7 @@
  * Module de gestion de la connection au serveur et de la
  * communication avec celui-ci.
  */
+#include <stdarg.h>
 #include "pse.h"
 #include "defs.h"
 #include "servIO.h"
@@ -35,16 +36,19 @@ int connectToServ(char machine[], char port[]) {
 	return sd;
 }
 
-void sendServ (int sd, const char* line) {
+void sendServ (int sd, const char* format, ...) {
 	int ret;
 	char buf[LIGNE_MAX];
+	va_list args;
 	
-	strcpy(buf, line);
+	va_start(args, format);
+	vsnprintf(buf, LIGNE_MAX, format, args);
+	va_end (args);
 	ret = ecrireLigne(sd, buf);
 	if (ret == -1) {
 		erreur_IO("sendServ - ecrireLigne");
 	}
-	printf("\tsent: %s\n\t%d octets\n", line, ret);
+	printf("\tsent: %s\t%d octets\n", buf, ret);
 
 	while ((ret = lireLigne(sd, buf)) == 0);
 	if (ret == -1) {

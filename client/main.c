@@ -15,7 +15,9 @@ int main(int argc, char *argv[]) {
 		erreur("usage: %s machine port clientName\n", argv[0]);
 	}
 	sd = connectToServ(argv[1], argv[2]);
+	printf("%s: retrieving info about client\n", CMD);
 	fillInfos(&myInfos, argv[3]);
+	printf("%s: joining auction\n", CMD);
 	sendServ(sd, myInfos.nom);
 	
 	if (close(sd) == -1) {

@@ -9,10 +9,10 @@
 int connectToServ (char machine[], char port[]);
 
 /*
- * Envoi au serveur la line.
+ * Envoi au serveur la string crée à partir du format et de la liste d'arguments.
  * Attend que le serveur réponde.
  */
-void sendServ (int sd, const char* line);
+void sendServ (int sd, const char* format, ...);
 
 
 #endif
