@@ -1,5 +1,5 @@
 #include "pse.h"
-#include "../client/defs.h"
+#include "defs.h"
 #include "main.h"
 #include "save.h"
 

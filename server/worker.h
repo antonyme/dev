@@ -11,6 +11,6 @@ void *traiterRequete (void *arg);
 /*
  * Crée un pool de NTHREADS workers
  */
-void createCohorte (DataSpec cohorte[]);
+void createCohorte ();
 
 #endif

@@ -11,12 +11,10 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in reception;
 	socklen_t receptionlen = sizeof(reception);
 	
-	DataSpec cohorte[NTHREADS];
-	
 	if (argc != 2) {
 		erreur("usage: %s port\n", argv[0]);
 	}
-	createCohorte(cohorte);
+	createCohorte();
 	ecoute = createEcoute(argv[1]);
 	
 	while (VRAI) {

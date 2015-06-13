@@ -30,7 +30,7 @@ void *traiterRequete (void *arg) {
 	pthread_exit(NULL);
 }
 
-void createCohorte (DataSpec cohorte[]) {
+void createCohorte () {
 	int ret, i;
 	
 	for (i=0; i<NTHREADS; i++) {
