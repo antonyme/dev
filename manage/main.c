@@ -4,7 +4,7 @@
 #include "save.h"
 
 int main (int argc, char *argv[]) {
-	
+
 	if (argc != 2) {
 		erreur("usage: %s action\n", argv[0]);
 	}
@@ -12,9 +12,9 @@ int main (int argc, char *argv[]) {
 		newClient();
 	}
 	else if (strcmp("new_object", argv[1]) == 0) {
-		//TODO newObject();
+		newObjet();
 	}
 	else printf("Mauvaise commande\n");
-	
+
 	return 0;
 }

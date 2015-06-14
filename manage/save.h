@@ -7,5 +7,6 @@
  * Ceci est enregistré dans dev/data/clients dans un fichier au nom du client
  */
 void newClient(void);
+void newObjet(void);
 
 #endif

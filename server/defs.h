@@ -9,6 +9,17 @@
 #include "../struct.h"
 
 DataSpec cohorte[NTHREADS];
+
+int nbObjs;
+int objInSale;
+OBJET objs[TMAX];
+pthread_mutex_t mutexObjs;
+
+int bid;
+pthread_cond_t condBid;
+pthread_mutex_t mutexBid;
+
 sem_t sem_work;
+
 
 #endif

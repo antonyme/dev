@@ -13,7 +13,7 @@ void fillInfos (ACHETEUR *me, char *name) {
 	strcat(fileName, name);
 	fp = fopen(fileName, "r");
 	if (fp == NULL) {
-		erreur_IO("open");
+		erreur_IO("fopen");
 	}
 	fread(me, sizeof(ACHETEUR), 1, fp);
 }

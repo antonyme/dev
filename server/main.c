@@ -5,9 +5,16 @@
 #include "defs.h"
 #include "clientIO.h"
 #include "worker.h"
+#include "auctioneer.h"
+#include "fileIO.h"
+
+pthread_mutex_t mutexObjs = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condBid = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutexBid = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char *argv[]) {
-	int ecoute, canal, i;
+	int ecoute, canal, i, ret;
+	pthread_t auctId = NTHREADS;
 	struct sockaddr_in reception;
 	socklen_t receptionlen = sizeof(reception);
 	
@@ -17,7 +24,13 @@ int main(int argc, char *argv[]) {
 	if (sem_init(&sem_work, 0, NTHREADS) == -1) {
 		erreur_IO("sem_init");
 	}
+	
+	fillAllObjs();
 	createCohorte();
+	ret = pthread_create(&auctId, NULL, createAuctioneer, NULL);
+	if (ret != 0) {
+		erreur_IO("pthread_create");
+	}
 	ecoute = createEcoute(argv[1]);
 	
 	while (VRAI) {

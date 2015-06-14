@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
 	ACHETEUR myInfos;
 	
 	signal(SIGPIPE, SIG_IGN);
+	srand(time(NULL));
 	
 	if (argc != 4) {
 		erreur("usage: %s machine port clientName\n", argv[0]);
