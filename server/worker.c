@@ -12,19 +12,23 @@ void *traiterRequete (void *arg) {
 	
 	while (VRAI) {
 		printf("worker %d: wait canal.\n", data->tid);
-		while (data->canal == -1) {
-			usleep(ATTENTE);
+		if (sem_wait(&data->sem) == -1) {
+			erreur_IO("sem_post");
 		}
 		data->libre = FAUX;
 		printf("worker %d: working on canal %d.\n", data->tid, data->canal);
 		recvCli(data->canal, buf);
 		sendCli(data->canal, "Welcome to our auction %s!", buf);
+		recvCli(data->canal, buf);
 		
 		if (close(data->canal) == -1) {
 			erreur_IO("close");
 		}
 		data->canal = -1;
 		data->libre = VRAI;
+		if (sem_post(&sem_work) == -1) {
+			erreur_pthread_IO("sem_post");
+		}
 	}
 	
 	pthread_exit(NULL);
@@ -38,6 +42,9 @@ void createCohorte () {
 		cohorte[i].libre = VRAI;
 		/* une valeur -1 indique pas de requete a traiter */
 		cohorte[i].canal = -1;
+		if (sem_init(&cohorte[i].sem, 0, 0) == -1) {
+			erreur_IO("sem_init");
+		}
 		ret = pthread_create(&cohorte[i].id, NULL, traiterRequete, &cohorte[i]);
 		if (ret != 0) {
 			erreur_IO("pthread_create");

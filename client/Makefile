@@ -13,8 +13,10 @@ all: $(SRC) $(EXE)
 
 $(EXE): $(OBJ)
 	$(CC) $(OBJ) -o $@ $(LDLIBS)
-%.o: %.c defs.h
+%.o: %.c %.h defs.h
 	$(CC) -c $(CFLAGS) $< -o $@
+
+main.o : servIO.h auction.h fileIO.h
 
 clean :
 	rm -f *.o $(EXE)

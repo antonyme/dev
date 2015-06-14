@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
 	printf("%s: joining auction\n", CMD);
 	sendServ(sd, myInfos.nom);
 	recvServ(sd, buf);
+	scanf("%s", buf);
+	sendServ(sd, buf);
 	
 	if (close(sd) == -1) {
 		erreur_IO("close");

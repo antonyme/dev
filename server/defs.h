@@ -9,5 +9,6 @@
 #include "../struct.h"
 
 DataSpec cohorte[NTHREADS];
+sem_t sem_work;
 
 #endif

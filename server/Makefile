@@ -16,5 +16,8 @@ $(EXE): $(OBJ)
 %.o: %.c defs.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+main.o : clientIO.h worker.h
+worker.o : clientIO.h
+
 clean :
 	rm -f *.o $(EXE)

@@ -16,5 +16,7 @@ $(EXE): $(OBJ)
 %.o: %.c defs.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+main.o: save.h
+
 clean :
 	rm -f *.o $(EXE)
