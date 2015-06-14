@@ -9,9 +9,10 @@
 #include "fileIO.h"
 
 int main(int argc, char *argv[]) {
-	int sd;
+	int sd, stay = VRAI;
 	char buf[LIGNE_MAX];
 	ACHETEUR myInfos;
+	OBJET toBuy;
 	
 	signal(SIGPIPE, SIG_IGN);
 	srand(time(NULL));
@@ -24,9 +25,30 @@ int main(int argc, char *argv[]) {
 	fillInfos(&myInfos, argv[3]);
 	printf("%s: joining auction\n", CMD);
 	sendServ(sd, myInfos.nom);
-	recvServ(sd, buf);
-	scanf("%s", buf);
-	sendServ(sd, buf);
+	while (stay) {
+		recvServ(sd, buf);
+		switch (buf[0]) {
+		case 'o' :		//new object
+			sscanf(buf+2, "%s %f %f %c %d", toBuy.nom, &toBuy.prix_ini, &toBuy.prix_cur, &toBuy.type, &toBuy.rare);
+			printf("%s: objet %s mis en vente au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
+			break;
+		case 'p' :		//new price
+			sscanf(buf+2, "%f", &toBuy.prix_cur);
+			printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
+			break;
+		default :
+			erreur("message du serveur inattendu : %s", buf);
+			break;
+		}
+		if(buf[0] == 'o' || buf[0] == 'p') { 	//decide how to act
+			testHang(&myInfos, &toBuy);
+			sendServ(sd, "%f %f", myInfos.latence, myInfos.prix_prop);
+			if(myInfos.latence == 0)
+				printf("%s: non interesse\n", CMD);
+			else
+				printf("%s: decide de monter a %f au bout de %f secondes\n", CMD, myInfos.prix_prop, myInfos.latence);
+		}
+	}
 	
 	if (close(sd) == -1) {
 		erreur_IO("close");

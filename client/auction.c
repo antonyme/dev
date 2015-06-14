@@ -133,7 +133,7 @@ void fjoueur (ACHETEUR *monsieurx, OBJET *bidule)
 	else
 	{
 		monsieurx->latence = 0;
-		printf("l'objet %s n'interesse pas Monsieur %s \n", bidule->name, monsieurx->nom);
+		printf("l'objet %s n'interesse pas Monsieur %s \n", bidule->nom, monsieurx->nom);
 	}
 }
 

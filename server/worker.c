@@ -16,8 +16,8 @@ void *traiterRequete (void *arg) {
 			erreur_IO("sem_post");
 		}
 		data->libre = FAUX;
-		printf("worker %d: working on canal %d.\n", data->tid, data->canal);
 		recvCli(data->canal, buf);
+		printf("worker %d: new client (%s) on canal %d.\n", data->tid, buf, data->canal);
 		sendCli(data->canal, "Welcome to our auction %s!", buf);
 		recvCli(data->canal, buf);
 		
