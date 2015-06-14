@@ -15,7 +15,7 @@ int objInSale;
 OBJET objs[TMAX];
 pthread_mutex_t mutexObjs;
 
-int bid;
+float bid;
 pthread_cond_t condBid;
 pthread_mutex_t mutexBid;
 

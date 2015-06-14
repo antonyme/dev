@@ -11,18 +11,20 @@ void *createAuctioneer () {
 	int numObj = 0, ret;
 	float price = objs[numObj].prix_ini;
 	
-	printf("Lancement de la vente des %d objets choisis\n", nbObjs);
+	printf("commissaire: lancement de la vente des %d objets choisis\n", nbObjs);
 	if (pthread_mutex_lock (&mutexBid) != 0) {
 		erreur_IO ("mutex_lock");
 	}
-	while (numObj != nbObjs - 1) {
+	while (numObj < nbObjs) {
 		setNewState(numObj, price);
+		printf("commissaire: mise en vente de l'objet %s à %f\n", objs[numObj].nom, objs[numObj].prix_cur);
 		ret = takeBid();
 		if (ret == 0) {
-			price = bid;	
+			price = bid;
+			printf("commissaire: nouvelle enchere : %f\n", price);
 		}
 		else if (ret == ETIMEDOUT) {
-			printf("Objet %d vendu\n", numObj);
+			printf("commissaire: objet %d vendu pour %f = %f\n", numObj, price, bid);
 			numObj++;
 			price = objs[numObj].prix_ini;
 		}
@@ -30,6 +32,7 @@ void *createAuctioneer () {
 			fprintf(stderr, "pthread_cond_timedwait: %d", ret);
 		}
 	}
+	printf("commissaire: fin de la vente\n");
 	pthread_exit(NULL);
 }
 

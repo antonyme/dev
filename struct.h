@@ -16,7 +16,7 @@ typedef struct acheteur {
 } ACHETEUR;
 
 typedef struct objet {
-	char name[TMAX];  //identifiant de l'objet.
+	char nom[TMAX];  //identifiant de l'objet.
 	float prix_ini;  //prix initial de l'objet.
 	float prix_cur;  //prix actuel de l'objet. Ce prix change à chaque nouvelle enchère
 	char type;  // bijou voiture maison (etc) peut être remplacé par un char*

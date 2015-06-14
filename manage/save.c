@@ -36,16 +36,16 @@ void newObjet (void) {
 	char filename[TMAX] = "./../data/objects/";
 
 	printf("Nom?\n> ");
-	scanf("%s", newo.name);
+	scanf("%s", newo.nom);
 	printf("entrez le prix initial\n> ");
 	scanf("%f",&newo.prix_ini );
 	printf("entrez le type\n> ");
 	scanf(" %c",&newo.type);
 	printf("entrez la rarete, valeur allant de 1 à 10\n> ");
 	scanf("%d", &newo.rare);
-	printf("\n Recapitulatif des informations renseignees pour l'objet %s \n Prix initial : %f \n Type : %c \n Rarete : %d \n \n", newo.name, newo.prix_ini, newo.type, newo.rare);
+	printf("\n Recapitulatif des informations renseignees pour l'objet %s \n Prix initial : %f \n Type : %c \n Rarete : %d \n \n", newo.nom, newo.prix_ini, newo.type, newo.rare);
 
-	strcat(filename, newo.name);  // on appelle le fichier par le nom de l'objet
+	strcat(filename, newo.nom);  // on appelle le fichier par le nom de l'objet
 
 	fo = fopen(filename, "w+");
 	if (fo == NULL) {
