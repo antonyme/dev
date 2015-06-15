@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
 	if (sem_init(&sem_work, 0, NTHREADS) == -1) {
 		erreur_IO("sem_init");
 	}
+	state = 0;
 	
 	fillAllObjs();
 	createCohorte();

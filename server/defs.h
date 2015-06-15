@@ -10,6 +10,8 @@
 
 DataSpec cohorte[NTHREADS];
 
+int state;
+
 int nbObjs;
 int objInSale;
 OBJET objs[TMAX];
@@ -20,6 +22,5 @@ pthread_cond_t condBid;
 pthread_mutex_t mutexBid;
 
 sem_t sem_work;
-
 
 #endif

@@ -13,4 +13,6 @@ void *traiterRequete (void *arg);
  */
 void createCohorte ();
 
+int waitToBid (float tmp);
+
 #endif

@@ -50,7 +50,6 @@ void sendCli (int sd, const char* format, ...) {
 	if (ret == -1) {
 		erreur_IO("ecrireLigne");
 	}
-	printf("\tsent: %s\t%d octets\n", buf, ret);
 
 	while ((ret = lireLigne(sd, buf)) == 0);
 	if (ret == -1) {
@@ -59,10 +58,7 @@ void sendCli (int sd, const char* format, ...) {
 	else if (ret == LIGNE_MAX) {
 		erreur("line too long\n");
 	}
-	if (strcmp(buf, "OK") == 0) {
-		printf("\tclient: received\n");
-	}
-	else {
+	if (strcmp(buf, "OK") != 0) {
 		erreur("bad answer from client: %s\n", buf);
 	}
 }
@@ -78,7 +74,6 @@ void recvCli (int sd, char* buf) {
 	else if (ret == LIGNE_MAX) {
 		erreur("line too long");
 	}
-	printf("\tclient: \"%s\"\n", buf);
 	ret = ecrireLigne(sd, bufRep);
 	if (ret == -1) {
 		erreur_IO("ecrireLigne");

@@ -7,8 +7,6 @@
  */
 void *createAuctioneer ();
 
-void setNewState (int numObj, float price);
-
 int takeBid ();
 
 #endif

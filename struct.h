@@ -2,6 +2,7 @@
 #define STRUCT_H
 
 #define    TMAX           50
+#define	   LATMAX         100000
 
 typedef struct acheteur {
 	char nom[TMAX]; // nom de l'acheteur
@@ -11,7 +12,7 @@ typedef struct acheteur {
 	int possession_B;  //  possession de bijoux à l'instant t
 	int possession_V;  // possession de voitures à l'instant t
 	int possession_M;  // possession de maisons à l'instant t
-	float latence;  // temps de latence de l'acheteur. 0 si non intéressé.
+	float latence;  // temps de latence de l'acheteur. LATMAX si non intéressé.
 	float prix_prop;  // prix proposé par l'acheteur
 } ACHETEUR;
 
