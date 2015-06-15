@@ -29,9 +29,9 @@ void *createAuctioneer () {
 		}
 		else if (ret == ETIMEDOUT) {
 			if (lastBidder[objInSale] == -1)
-				printf("commissaire: pas d'acheteur pour l'objet %d\n", objInSale);
+				printf("commissaire: pas d'acheteur pour l'objet %s\n", objs[objInSale].nom);
 			else
-				printf("commissaire: objet %d vendu pour %f au client du worker %d\n", objInSale, objs[objInSale].prix_cur, lastBidder[objInSale]);
+				printf("commissaire: objet %s vendu pour %f au client du worker %d\n", objs[objInSale].nom, objs[objInSale].prix_cur, lastBidder[objInSale]);
 			state++;
 			objInSale++;
 			if (pthread_cond_broadcast(&condBid) != 0) {

@@ -22,12 +22,10 @@ void *traiterRequete (void *arg) {
 		data->libre = FAUX;
 		recvCli(data->canal, buf);
 		printf("worker %d: new client (%s) on canal %d.\n", data->tid, buf, data->canal);
-		
+		if (pthread_mutex_lock (&mutexBid) != 0) {
+			erreur_IO ("mutex_lock");
+		}
 		while (state >= 0) {
-			
-			if (pthread_mutex_lock (&mutexBid) != 0) {
-				erreur_IO ("mutex_lock");
-			}
 			numObj = objInSale;
 			printf("worker %d: envoi d'infos sur l'objet %s\n", data->tid, objs[numObj].nom);
 			sendCli(data->canal, "o %s %f %f %c %d", objs[numObj].nom, objs[numObj].prix_ini, objs[numObj].prix_cur, objs[numObj].type, objs[numObj].rare);
@@ -58,7 +56,10 @@ void *traiterRequete (void *arg) {
 				}	
 			}
 		}
-		
+		sendCli(data->canal, "f");
+		if (pthread_mutex_lock (&mutexBid) != 0) {
+			erreur_IO ("mutex_lock");
+		}		
 		if (close(data->canal) == -1) {
 			erreur_IO("close");
 		}
@@ -68,7 +69,6 @@ void *traiterRequete (void *arg) {
 			erreur_pthread_IO("sem_post");
 		}
 	}
-	
 	pthread_exit(NULL);
 }
 

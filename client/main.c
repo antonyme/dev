@@ -37,6 +37,10 @@ int main(int argc, char *argv[]) {
 			sscanf(buf+2, "%f", &toBuy.prix_cur);
 			printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
 			break;
+		case 'f' :
+			printf("bye\n");
+			stay = FAUX;
+			break;
 		default :
 			erreur("message du serveur inattendu : %s", buf);
 			break;
