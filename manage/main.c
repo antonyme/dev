@@ -6,7 +6,7 @@
 int main (int argc, char *argv[]) {
 
 	if (argc != 2) {
-		erreur("usage: %s action\n", argv[0]);
+		erreur("usage: %s action\nlist actions:\n\tnew_client\n\tnew_object\n", argv[0]);
 	}
 	if (strcmp("new_client", argv[1]) == 0) {
 		newClient();

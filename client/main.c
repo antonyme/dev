@@ -20,9 +20,10 @@ int main(int argc, char *argv[]) {
 	if (argc != 4) {
 		erreur("usage: %s machine port clientName\n", argv[0]);
 	}
-	sd = connectToServ(argv[1], argv[2]);
 	printf("%s: retrieving info about client\n", CMD);
 	fillInfos(&myInfos, argv[3]);
+	myInfos.argent_cur = myInfos.argent_ini;
+	sd = connectToServ(argv[1], argv[2]);
 	printf("%s: joining auction\n", CMD);
 	sendServ(sd, myInfos.nom);
 	while (stay) {
@@ -41,9 +42,9 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 		if(buf[0] == 'o' || buf[0] == 'p') { 	//decide how to act
-			testHang(&myInfos, &toBuy);
+			getHangTime(&myInfos, &toBuy);
 			sendServ(sd, "%f %f", myInfos.latence, myInfos.prix_prop);
-			if(myInfos.latence == 0)
+			if(myInfos.latence == LATMAX)
 				printf("%s: non interesse\n", CMD);
 			else
 				printf("%s: decide de monter a %f au bout de %f secondes\n", CMD, myInfos.prix_prop, myInfos.latence);

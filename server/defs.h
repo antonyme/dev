@@ -18,6 +18,7 @@ OBJET objs[TMAX];
 pthread_mutex_t mutexObjs;
 
 float bid;
+int bidder;
 pthread_cond_t condBid;
 pthread_mutex_t mutexBid;
 
