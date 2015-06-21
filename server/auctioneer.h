@@ -7,6 +7,14 @@
  */
 void *createAuctioneer ();
 
-int takeBid ();
+/*
+ * Attend une enchère ou l'expiration du délais d'attente
+ */
+int waitBid ();
+
+/*
+ * Poste sur le semaphore des workers actifs 
+ */
+void wakeClients ();
 
 #endif

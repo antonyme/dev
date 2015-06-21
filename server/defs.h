@@ -10,18 +10,20 @@
 
 DataSpec cohorte[NTHREADS];
 
-int state;
+int clientMessage, endObj, end;
 
+int nbClients;
+int clients[NTHREADS];
 int nbObjs;
-int objInSale;
-OBJET objs[TMAX];
-pthread_mutex_t mutexObjs;
+OBJET objs[TMAX], curObj;
 
 float bid;
 int bidder;
 pthread_cond_t condBid;
 pthread_mutex_t mutexBid;
 
-sem_t sem_work;
+sem_t semWork;
+
+pthread_barrier_t auctionStart;
 
 #endif

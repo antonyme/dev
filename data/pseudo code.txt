@@ -1,0 +1,96 @@
+==client==
+fill info
+connect
+send infos
+while stay
+	recv object
+	while 1	
+		get hang time
+		select wait time
+		if server message then
+			recv
+		if select timeout
+			send prix_prop
+			recv
+			if accepted then continue
+		if end object then break
+		if end then
+			stay = faux
+			break
+		if new price
+			update info
+
+==server==
+init
+fill objects
+create pool
+create auctioneer
+create sock ecoute
+while 1
+	update sock set
+	select
+	if sock master
+		accept connexion
+		wait semWork
+		find free worker
+		set canal
+		post to his sem
+	if IO
+		find which sock
+		post to his sem
+		
+
+==worker==
+while 1
+	wait data->sem
+	data->libre = faux
+	recv infos
+	update clients tab (join)
+	wait data->sem (wait 1st obj auction)
+	while stay
+		wait barrier auction start
+		send object
+		while 1
+			wait data->sem
+			lock bid
+			if end then (woke by auctioneer)
+				send end
+				stay = faux
+				break
+			if end object then (woke by auctioneer)
+				send end object
+				break
+			if bid != obj.prix_cur then (woke by auctioneer)
+				send new price
+			if client message then (woke by server)
+				recv
+				if new bid then
+					if bid == obj.prix_cur then
+						set client bid
+						send accepted
+						wake auctioneer (signal cond bid)
+			unlock bid
+
+
+==auctioneer==
+wait 1 min
+for each object
+	wake clients
+	set object
+	bid = curObj.prix_cur = curObj.prix_ini
+	wait barrier auction start
+	lock bid
+	end object = faux
+	while 1
+		while(bid == curObj.prix_cur)
+			cond wait bid 15s
+		if signaled then
+			curObj.prix_cur = bid
+		if timeout then
+			end object = vrai
+			break
+		wake clients
+end = vrai
+
+
+

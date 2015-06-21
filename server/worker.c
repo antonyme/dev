@@ -9,63 +9,103 @@
 #include "clientIO.h"
 
 void *traiterRequete (void *arg) {
-	int numObj, ret;
-	float latence, prix_prop;
+	int stay = VRAI;
+	float prix_prop;
 	DataSpec * data = (DataSpec *) arg;
 	char buf[LIGNE_MAX];
 	
 	while (VRAI) {
 		printf("worker %d: wait canal.\n", data->tid);
 		if (sem_wait(&data->sem) == -1) {
-			erreur_IO("sem_post");
+			erreur_IO("sem_wait");
 		}
 		data->libre = FAUX;
+		
+		//recv infos
 		recvCli(data->canal, buf);
 		printf("worker %d: new client (%s) on canal %d.\n", data->tid, buf, data->canal);
-		if (pthread_mutex_lock (&mutexBid) != 0) {
-			erreur_IO ("mutex_lock");
+		
+		//join
+		nbClients++;
+		for(i = 0; i<NTHREADS; i++)
+			if(clients[i] == -1) break;
+		clients[i] = data->tid;
+		
+		printf("worker %d: wait auction start.\n", data->tid);
+		if (sem_wait(&data->sem) == -1) {
+			erreur_IO("sem_wait");
 		}
-		while (state >= 0) {
-			numObj = objInSale;
-			printf("worker %d: envoi d'infos sur l'objet %s\n", data->tid, objs[numObj].nom);
-			sendCli(data->canal, "o %s %f %f %c %d", objs[numObj].nom, objs[numObj].prix_ini, objs[numObj].prix_cur, objs[numObj].type, objs[numObj].rare);
+		
+		while (stay) {
 			
-			recvCli(data->canal, buf);
-			sscanf(buf, "%f %f", &latence, &prix_prop);
+			//barrier
+			if (pthread_barrier_wait(&auctionStart) != 0) {
+				erreur_IO ("barrier_wait");
+			}
 			
-			while(numObj == objInSale) {
-				if (latence == LATMAX)
-					printf("worker %d: pas de proposition a venir\n", data->tid);
-				else					
-					printf("worker %d: attente %f avant proposition a %f\n", data->tid, latence, prix_prop);
-				ret = waitToBid(latence);
-				if (ret == 0) {	//trop lent à réagir
-					printf("worker %d: reveille avant fin d'attente\n", data->tid);
-					if (numObj == objInSale) {
-						printf("worker %d: envoi du nouveau prix: %f\n", data->tid, objs[objInSale].prix_cur);
-						sendCli(data->canal, "p %f", objs[objInSale].prix_cur);
-						recvCli(data->canal, buf);
-						sscanf(buf, "%f %f", &latence, &prix_prop);
-					}
-					else break;
+			//send object
+			printf("worker %d: send object infos: %s\n", data->tid, curObj.nom);
+			sendCli(data->canal, "o %s %f %f %c %d", curObj.nom, curObj.prix_ini, curObj.prix_cur, curObj.type, curObj.rare);
+			if (sem_post(&semNewObj) == -1) {
+				erreur_IO("sem_post");
+			}
+			
+			while(VRAI) {
+				
+				//wait for a change
+				if (sem_wait(&data->sem) == -1) {
+					erreur_IO("sem_post");
 				}
-				else {		//fin de latence
-					state++;
-					bid = prix_prop;
-					latence = LATMAX; //pas d'autosurenchere
-				}	
+				
+				//lock bid
+				if (pthread_mutex_lock (&mutexBid) != 0) {
+					erreur_IO ("mutex_lock");
+				}
+				
+				//woke by auctioneer
+				if (end) {
+					sendCli(data->canal, "end");
+					stay = FAUX;
+					break;
+				}
+				if (endObj) {
+					sendCli(data->canal, "end object");
+					break;
+				}
+				if (bid != obj.prix_cur) { //new price
+					sendCli(data->canal, "n %f", bid);
+				}
+				
+				//woke by server
+				if (clientMessage) {
+					clientMessage = FAUX;
+					recvCli(data->canal, buf);
+					if (buf[0] == 'b') { //new bid
+						sscanf(buf+2, "%f", &prix_prop);
+						if (bid == obj.prix_cur && prix_prop > bid) { //no previous bet unprocessed
+							bid = prix_prop;
+							sendCli(data->canal, "accepted");
+							
+							//wake auctioneer
+							pthread_cond_signal(&condBid);
+						}
+					}
+				}
+				
+				//unlock bid
+				if (pthread_mutex_unlock (&mutexBid) != 0) {
+					erreur_IO ("mutex_unlock");
+				}
 			}
 		}
-		sendCli(data->canal, "f");
-		if (pthread_mutex_lock (&mutexBid) != 0) {
-			erreur_IO ("mutex_lock");
-		}		
+		
+		sendCli(data->canal, "f");	
 		if (close(data->canal) == -1) {
 			erreur_IO("close");
 		}
 		data->canal = -1;
 		data->libre = VRAI;
-		if (sem_post(&sem_work) == -1) {
+		if (sem_post(&semWork) == -1) {
 			erreur_pthread_IO("sem_post");
 		}
 	}
@@ -78,32 +118,19 @@ void createCohorte () {
 	for (i=0; i<NTHREADS; i++) {
 		cohorte[i].tid = i;
 		cohorte[i].libre = VRAI;
-		/* une valeur -1 indique pas de requete a traiter */
+		
+		//-1 -> no client assigned
 		cohorte[i].canal = -1;
+		
+		//init sem
 		if (sem_init(&cohorte[i].sem, 0, 0) == -1) {
 			erreur_IO("sem_init");
 		}
+		
+		//create thread
 		ret = pthread_create(&cohorte[i].id, NULL, traiterRequete, &cohorte[i]);
 		if (ret != 0) {
 			erreur_IO("pthread_create");
 		}
 	}
-}
-
-int waitToBid (float tmp) {
-	int lastState = state, lastBid = bid, ret = 0;
-	struct timespec timeToWait;
-	struct timeval now;
-	
-	gettimeofday(&now,NULL);
-	timeToWait.tv_sec = now.tv_sec + (int)tmp;
-	timeToWait.tv_nsec = now.tv_usec * 1000;
-	
-	if (pthread_cond_broadcast(&condBid) != 0) {
-		erreur_IO("pthread_cond_broadcast");
-	}
-	while (ret == 0 && (state == lastState || bid == lastBid)) {
-		ret = pthread_cond_timedwait(&condBid, &mutexBid, &timeToWait);
-	}
-	return ret;
 }

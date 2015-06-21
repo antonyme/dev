@@ -8,42 +8,59 @@
 #include "auctioneer.h"
 
 void *createAuctioneer () {
-	int ret;
-	int lastBidder[TMAX];
+	int i, ret, lastBidder[TMAX];
 	
-	memset(lastBidder, -1, sizeof(lastBidder));
+	sleep(60);
 	printf("commissaire: lancement de la vente des %d objets choisis\n", nbObjs);
-	if (pthread_mutex_lock (&mutexBid) != 0) {
-		erreur_IO ("mutex_lock");
+	
+	//init barrier
+	if (pthread_barrier_init(&auctionStart, NULL, nbClients) != 0) {
+		erreur_IO ("barrier_init");
 	}
-	while (objInSale < nbObjs) {
-		if (lastBidder[objInSale] == -1) {
-			objs[objInSale].prix_cur = objs[objInSale].prix_ini;
+	
+	for (i = 0; i<nbObjs; i++) {
+		wakeClients();
+		
+		//set object
+		curObj = objs[i];
+		
+		bid = curObj.prix_cur = curObj.prix_ini;
+		
+		//barrier (wait clients)
+		if (pthread_barrier_wait(&auctionStart) != 0) {
+			erreur_IO ("barrier_wait");
 		}
-		printf("commissaire: mise en vente de l'objet %s à %f\n", objs[objInSale].nom, objs[objInSale].prix_cur);
-		ret = takeBid();
-		if (ret == 0) {
-			objs[objInSale].prix_cur = bid;
-			lastBidder[objInSale] = bidder;
-			printf("commissaire: nouvelle enchere : %f\n", objs[objInSale].prix_cur);
+		
+		//lock bid
+		if (pthread_mutex_lock (&mutexBid) != 0) {
+			erreur_IO ("mutex_lock");
 		}
-		else if (ret == ETIMEDOUT) {
-			if (lastBidder[objInSale] == -1)
-				printf("commissaire: pas d'acheteur pour l'objet %s\n", objs[objInSale].nom);
-			else
-				printf("commissaire: objet %s vendu pour %f au client du worker %d\n", objs[objInSale].nom, objs[objInSale].prix_cur, lastBidder[objInSale]);
-			state++;
-			objInSale++;
-			if (pthread_cond_broadcast(&condBid) != 0) {
-				erreur_IO("pthread_cond_broadcast");
+		
+		endObj = FAUX
+		
+		while (VRAI) {
+			printf("commissaire: mise en vente de l'objet %s à %f\n", obj.nom, obj.prix_cur);
+			ret = waitBid();
+			if (ret == 0) { //signaled (bid from client)
+				curObj.prix_cur = bid;
+				lastBidder[i] = bidder;
 			}
-		}
-		else {
-			fprintf(stderr, "pthread_cond_timedwait: %d", ret);
+			else if (ret == ETIMEDOUT) { //timed out (no new bid)
+				if (lastBidder[i] == -1)
+					printf("commissaire: pas d'acheteur pour l'objet %s\n", obj.nom);
+				else
+					printf("commissaire: objet %s vendu pour %f au client du worker %d\n", obj.nom, obj.prix_cur, lastBidder[i]);
+				endObj = VRAI;
+				break;
+			}
+			else {
+				fprintf(stderr, "pthread_cond_timedwait: %d", ret);
+			}
+			wakeClients();
 		}
 	}
+	end = VRAI;
 	printf("commissaire: fin de la vente\n");
-	state = -1;
 	if (pthread_mutex_unlock (&mutexBid) != 0) {
 		erreur_IO ("mutex_unlock");
 	}
@@ -51,8 +68,8 @@ void *createAuctioneer () {
 	pthread_exit(NULL);
 }
 
-int takeBid () {
-	int lastState = state, ret = 0;
+int waitBid () {
+	int ret = 0;
 	struct timespec timeToWait;
 	struct timeval now;
 	
@@ -60,8 +77,18 @@ int takeBid () {
 	timeToWait.tv_sec = now.tv_sec + 20;
 	timeToWait.tv_nsec = now.tv_usec * 1000;
 	
-	while (ret == 0 && state == lastState) {
+	while (ret == 0 && bid == curObj.prix_cur) {
 		ret = pthread_cond_timedwait(&condBid, &mutexBid, &timeToWait);
 	}
 	return ret;
+}
+
+void wakeClients () {
+	int i;
+	
+	for (i = 0; i<nbClients; i++) {
+		if (sem_post(&cohorte[clients[i]].sem) == -1) {
+			erreur_IO("sem_post");
+		}
+	}
 }
