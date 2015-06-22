@@ -46,20 +46,20 @@ void foisif (ACHETEUR *monsieurx, OBJET *bidule)
 			monsieurx->argent_cur >= 2*bidule->prix_cur && 
 			bidule->prix_cur <= 2*(bidule->prix_ini) )
 	{
-		monsieurx->latence = rand_a_b(6, 10);
-		monsieurx->prix_prop = bidule->prix_cur + 0.4*(bidule->prix_cur);
+		monsieurx->latence = rand_a_b(2, 25);
+		monsieurx->prix_prop = bidule->prix_cur + rand_a_b(0.1,0.5)*(bidule->prix_cur);
 	}
 	else monsieurx->latence = LATMAX;
 }
 
 void fcollectionneur (ACHETEUR *monsieurx, OBJET *bidule)
 {
-	if ((bidule->rare >=5) 
-		&& (monsieurx->argent_cur >= 1.1*bidule->prix_cur) 
-		&& bidule->prix_cur <= 4*(bidule->prix_ini))
+	if ((bidule->rare >=8) && 
+		(monsieurx->argent_cur >= 1.1*bidule->prix_cur) && 
+		bidule->prix_cur <= 4*(bidule->prix_ini))
 	{
-		monsieurx->prix_prop = bidule->prix_cur + 0.10*(bidule->prix_cur);
-		monsieurx->latence = rand_a_b(1,2);
+		monsieurx->prix_prop = bidule->prix_cur + rand_a_b(0.05,0.15)*(bidule->prix_cur);
+		monsieurx->latence = rand_a_b(1,5);
 	}
 	else {monsieurx->latence = LATMAX;}
 }
@@ -67,10 +67,12 @@ void fcollectionneur (ACHETEUR *monsieurx, OBJET *bidule)
 
 void fmilliardaire (ACHETEUR *monsieurx, OBJET *bidule)
 {
-	if((bidule->rare >= 3) && (monsieurx->argent_cur >= 3*bidule->prix_cur) && bidule->prix_cur <= bidule->prix_ini)
+	if((bidule->rare >= 6) && 
+		(monsieurx->argent_cur >= 3*bidule->prix_cur) && 
+		bidule->prix_cur <= 10*bidule->prix_ini)
 	{
-		monsieurx->prix_prop = bidule->prix_cur + 1*(bidule->prix_cur);
-		monsieurx->latence = rand_a_b(2,4);
+		monsieurx->prix_prop = bidule->prix_cur + rand_a_b(0.5,0.7)*(bidule->prix_cur);
+		monsieurx->latence = rand_a_b(3,8);
 	}
 	else {monsieurx->latence = LATMAX;}
 }
@@ -78,10 +80,10 @@ void fmilliardaire (ACHETEUR *monsieurx, OBJET *bidule)
 
 void favare (ACHETEUR *monsieurx, OBJET *bidule)
 {
-	if (bidule->rare >= 2 && monsieurx->argent_cur >= 4*bidule->prix_cur)
+	if (bidule->rare >= 5 && monsieurx->argent_cur >= 4*bidule->prix_cur)
 	{
-		monsieurx->prix_prop = bidule->prix_cur + 0.04*bidule->prix_cur;
-		monsieurx->latence = rand_a_b(5,8);
+		monsieurx->prix_prop = bidule->prix_cur + rand_a_b(0.02,0.04)*bidule->prix_cur;
+		monsieurx->latence = rand_a_b(5,20);
 	}
 	else {monsieurx->latence = LATMAX;}
 }
@@ -89,10 +91,14 @@ void favare (ACHETEUR *monsieurx, OBJET *bidule)
 
 void flambda (ACHETEUR *monsieurx, OBJET *bidule)
 {
-	if ( ((bidule->type=='B'&& monsieurx->possession_B<=3) || (bidule->type=='V'&& monsieurx->possession_V<=3) || (bidule->type=='M'&& monsieurx->possession_M<=3)) && monsieurx->argent_cur >= (bidule->prix_cur)*2 && bidule->prix_cur <= 3*(bidule->prix_ini))
+	if ( ((bidule->type=='B'&& monsieurx->possession_B<=3) || 
+		(bidule->type=='V'&& monsieurx->possession_V<=3) || 
+		(bidule->type=='M'&& monsieurx->possession_M<=3)) && 
+		monsieurx->argent_cur >= (bidule->prix_cur)*2 && 
+		bidule->prix_cur <= 3*(bidule->prix_ini))
 	{
-		monsieurx->latence = rand_a_b(3,7);
-		monsieurx->prix_prop = bidule->prix_cur + 0.5*(bidule->prix_cur);
+		monsieurx->latence = rand_a_b(3,10);
+		monsieurx->prix_prop = bidule->prix_cur + rand_a_b(0.2,0.4)*(bidule->prix_cur);
 	}
 	else {monsieurx->latence = LATMAX;}
 }

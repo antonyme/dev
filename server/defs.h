@@ -3,8 +3,8 @@
 
 #define    CMD            "serveur"
 #define    NTHREADS       5
-#define    MILLISECONDES  1000
-#define    ATTENTE        2000*MILLISECONDES
+#define	   START_WAIT     15
+#define    AUCT_WAIT	  20
 
 #include "../struct.h"
 

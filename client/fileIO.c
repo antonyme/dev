@@ -22,3 +22,7 @@ void fillInfos (ACHETEUR *me, char *name) {
 		erreur_IO("fread");
 	}
 }
+
+void showInfos (ACHETEUR *me) {
+	printf("\nMonsieur %s:\n Personnalite: %s\n Capital initial: %.2f\n Bijoux: %d\n Voitures: %d\n Maisons: %d\n \n", me->nom,me->personnalite,me->argent_ini,me->possession_B,me->possession_V,me->possession_M);
+}

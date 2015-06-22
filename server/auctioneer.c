@@ -11,7 +11,7 @@ void *createAuctioneer () {
 	int i, ret, lastBidder[TMAX];
 	
 	memset(lastBidder, -1, sizeof(lastBidder));
-	sleep(15);
+	sleep(START_WAIT);
 	printf("commissaire: lancement de la vente des %d objets choisis\n", nbObjs);
 	
 	//init barrier
@@ -27,7 +27,7 @@ void *createAuctioneer () {
 		curObj = &objs[i];
 		bid = curObj->prix_cur = curObj->prix_ini;
 		
-		printf("commissaire: mise en vente de l'objet %s à %f\n", curObj->nom, curObj->prix_cur);
+		printf("commissaire: mise en vente de l'objet %s à %.2f\n", curObj->nom, curObj->prix_cur);
 		
 		//barrier (wait clients)
 		ret = pthread_barrier_wait(&auctionStart);
@@ -47,13 +47,13 @@ void *createAuctioneer () {
 			if (ret == 0) { //signaled (bid from client)
 				curObj->prix_cur = bid;
 				lastBidder[i] = bidder;
-				printf("commissaire: enchere à %f du client du worker %d\n", curObj->prix_cur, lastBidder[i]);
+				printf("commissaire: enchere à %.2f du client du worker %d\n", curObj->prix_cur, lastBidder[i]);
 			}
 			else if (ret == ETIMEDOUT) { //timed out (no new bid)
 				if (lastBidder[i] == -1)
 					printf("commissaire: pas d'acheteur pour l'objet %s\n", curObj->nom);
 				else
-					printf("commissaire: objet %s vendu pour %f au client du worker %d\n", curObj->nom, curObj->prix_cur, lastBidder[i]);
+					printf("commissaire: objet %s vendu pour %.2f au client du worker %d\n", curObj->nom, curObj->prix_cur, lastBidder[i]);
 				endObj = VRAI;
 				break;
 			}
@@ -79,7 +79,7 @@ int waitBid () {
 	struct timeval now;
 	
 	gettimeofday(&now,NULL);
-	timeToWait.tv_sec = now.tv_sec + 20;
+	timeToWait.tv_sec = now.tv_sec + AUCT_WAIT;
 	timeToWait.tv_nsec = now.tv_usec * 1000;
 	
 	while (ret == 0 && bid == curObj->prix_cur) {

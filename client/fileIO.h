@@ -7,4 +7,9 @@
  */
 void fillInfos (ACHETEUR *me, char *name);
 
+/*
+ * Affiche le contenu de la structure
+ */
+void showInfos (ACHETEUR *me);
+
 #endif

@@ -19,7 +19,7 @@ void newClient (void) {
 	scanf("%d", &new.possession_V);
 	printf("entrez le nombre de maisons\n> ");
 	scanf("%d", &new.possession_M);
-	printf("\n Recapitulatif des informations renseignees pour Monsieur %s: \n Personnalite: %s \n Capital initial : %f \n Bijoux : %d \n Voitures : %d \n Maisons : %d \n \n", new.nom,new.personnalite,new.argent_ini,new.possession_B,new.possession_V,new.possession_M);
+	printf("\n Recapitulatif des informations renseignees pour Monsieur %s: \n Personnalite: %s \n Capital initial : %.2f \n Bijoux : %d \n Voitures : %d \n Maisons : %d \n \n", new.nom,new.personnalite,new.argent_ini,new.possession_B,new.possession_V,new.possession_M);
 
 	strcat(fileName, new.nom);  // on appelle le fichier par le prénom du mec
 	fp = fopen(fileName, "w+");
@@ -43,7 +43,7 @@ void newObjet (void) {
 	scanf(" %c",&newo.type);
 	printf("entrez la rarete, valeur allant de 1 à 10\n> ");
 	scanf("%d", &newo.rare);
-	printf("\n Recapitulatif des informations renseignees pour l'objet %s \n Prix initial : %f \n Type : %c \n Rarete : %d \n \n", newo.nom, newo.prix_ini, newo.type, newo.rare);
+	printf("\n Recapitulatif des informations renseignees pour l'objet %s \n Prix initial : %.2f \n Type : %c \n Rarete : %d \n \n", newo.nom, newo.prix_ini, newo.type, newo.rare);
 
 	strcat(filename, newo.nom);  // on appelle le fichier par le nom de l'objet
 

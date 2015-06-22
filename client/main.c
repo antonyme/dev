@@ -26,6 +26,11 @@ int main(int argc, char *argv[]) {
 	printf("%s: retrieving info about client\n", CMD);
 	fillInfos(&myInfos, argv[3]);
 	myInfos.argent_cur = myInfos.argent_ini;
+	showInfos(&myInfos);
+	do {
+		printf("server ready? (o/n)\n> ");
+		scanf("%s", buf);
+	} while (strcmp(buf, "o") != 0);
 
 	printf("%s: joining auction\n", CMD);
 	sd = connectToServ(argv[1], argv[2]);
@@ -36,7 +41,7 @@ int main(int argc, char *argv[]) {
 		//recv object
 		recvServ(sd, buf);
 		sscanf(buf+2, "%s %f %f %c %d", toBuy.nom, &toBuy.prix_ini, &toBuy.prix_cur, &toBuy.type, &toBuy.rare);
-		printf("%s: objet %s mis en vente au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
+		printf("%s: objet %s mis en vente au prix %.2f\n", CMD, toBuy.nom, toBuy.prix_cur);
 		
 		while (VRAI) {
 			
@@ -51,7 +56,7 @@ int main(int argc, char *argv[]) {
 			}
 			else getHangTime(&myInfos, &toBuy);
 			tv.tv_sec = (long)myInfos.latence;
-			tv.tv_usec = 0;
+			tv.tv_usec = (long)((myInfos.latence - (int)myInfos.latence)*1000*1000);
 			if (tv.tv_sec == LATMAX)
 				if (lastBid) {
 					printf("%s: meilleur offre: attente\n", CMD);
@@ -60,7 +65,7 @@ int main(int argc, char *argv[]) {
 					printf("%s: non interesse\n", CMD);
 				}
 			else
-				printf("%s: decide de monter a %f au bout de %f secondes\n", CMD, myInfos.prix_prop, myInfos.latence);
+				printf("%s: decide de monter a %.2f au bout de %.2f secondes\n", CMD, myInfos.prix_prop, myInfos.latence);
 
 			//wait
 			activity = select(sd+1, &readfds, NULL, NULL, &tv);
@@ -95,7 +100,7 @@ int main(int argc, char *argv[]) {
 			else if (buf[0] == 'n') { //new price
 				sscanf(buf+2, "%f", &toBuy.prix_cur);
 				lastBid = FAUX;
-				printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
+				printf("%s: l'objet %s est monte au prix %.2f\n", CMD, toBuy.nom, toBuy.prix_cur);
 			}
 			else {
 				erreur("wrong message from server: %s\n", buf);
@@ -104,7 +109,7 @@ int main(int argc, char *argv[]) {
 		
 		if (lastBid) {
 			lastBid = FAUX;
-			printf("%s: objet %s obtenu au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
+			printf("%s: objet %s obtenu au prix %.2f\n", CMD, toBuy.nom, toBuy.prix_cur);
 		}
 	}
 	
