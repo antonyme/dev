@@ -20,12 +20,14 @@ void *createAuctioneer () {
 	}
 	
 	for (i = 0; i<nbObjs; i++) {
+		
 		wakeClients();
 		
 		//set object
 		curObj = &objs[i];
-		
 		bid = curObj->prix_cur = curObj->prix_ini;
+		
+		printf("commissaire: mise en vente de l'objet %s à %f\n", curObj->nom, curObj->prix_cur);
 		
 		//barrier (wait clients)
 		ret = pthread_barrier_wait(&auctionStart);
@@ -41,7 +43,6 @@ void *createAuctioneer () {
 		endObj = FAUX;
 		
 		while (VRAI) {
-			printf("commissaire: mise en vente de l'objet %s à %f\n", curObj->nom, curObj->prix_cur);
 			ret = waitBid();
 			if (ret == 0) { //signaled (bid from client)
 				curObj->prix_cur = bid;
@@ -82,7 +83,6 @@ int waitBid () {
 	
 	while (ret == 0 && bid == curObj->prix_cur) {
 		ret = pthread_cond_timedwait(&condBid, &mutexBid, &timeToWait);
-		printf("ret %d\n", ret);
 	}
 	return ret;
 }

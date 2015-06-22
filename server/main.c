@@ -32,7 +32,6 @@ int main(int argc, char *argv[]) {
 	masterSd = createEcoute(argv[1]);
 	
 	while (VRAI) {
-		sleep(1);
 		
 		//clear the socket set
 		FD_ZERO(&readfds);
@@ -45,17 +44,17 @@ int main(int argc, char *argv[]) {
 		for (i = 0; i < NTHREADS; i++) {
 			//if valid socket descriptor then add to read list
 			if(!cohorte[i].libre)
-			FD_SET(cohorte[i].canal, &readfds);
+				FD_SET(cohorte[i].canal, &readfds);
 			
 			//highest file descriptor number, need it for the select function
 			if(cohorte[i].canal > maxSd)
-			maxSd = cohorte[i].canal;
+				maxSd = cohorte[i].canal;
 		}
 		
 		//wait indefinitely for an activity on one of the sockets
 		activity = select(maxSd + 1, &readfds, NULL, NULL, NULL);
-		if ((activity < 0) && (errno!=EINTR)) {
-			printf("select error");
+		if (activity <= 0) {
+			erreur_IO("select");
 		}
 		
 		//if something happened on the master socket , then its an incoming connection
@@ -92,10 +91,12 @@ int main(int argc, char *argv[]) {
 			clientMessage = VRAI;
 			for(i = 0; i<NTHREADS; i++) {
 				if(FD_ISSET(cohorte[i].canal, &readfds)) {
-printf("server: waking worker %d\n", i);
-					//wake worker for IO
-					if (sem_post(&cohorte[i].sem) == -1) {
-						erreur_IO("sem_post");
+					sem_getvalue(&cohorte[i].sem, &ret);
+					if(ret < 1) {
+						//wake worker for IO
+						if (sem_post(&cohorte[i].sem) == -1) {
+							erreur_IO("sem_post");
+						}	
 					}
 				}
 			}	

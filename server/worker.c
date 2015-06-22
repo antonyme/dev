@@ -52,14 +52,14 @@ void *traiterRequete (void *arg) {
 				
 				//wait for a change
 				if (sem_wait(&data->sem) == -1) {
-					erreur_IO("sem_post");
+					erreur_IO("sem_wait");
 				}
-printf("worker %d: woke\n", data->tid);
+				
 				//lock bid
 				if (pthread_mutex_lock (&mutexBid) != 0) {
 					erreur_IO ("mutex_lock");
 				}
-printf("worker %d: lock\n", data->tid);
+				
 				//woke by auctioneer
 				if (end) {
 					sendCli(data->canal, "end");
@@ -71,7 +71,6 @@ printf("worker %d: lock\n", data->tid);
 					break;
 				}
 				if (bid != lastPrice) { //new price
-printf("worker %d: send new price : %f\n", data->tid, bid);
 					lastPrice = bid;
 					sendCli(data->canal, "n %f", bid);
 				}
@@ -79,11 +78,11 @@ printf("worker %d: send new price : %f\n", data->tid, bid);
 				//woke by server
 				if (clientMessage) {
 					clientMessage = FAUX;
-					recvCli(data->canal, buf);
-printf("worker %d: client bid: %s\n", data->tid, buf);
-					if (buf[0] == 'b') { //new bid
+					fcntl(data->canal, F_SETFL, O_NONBLOCK);
+					if(read(data->canal, buf, 1) == 1 && buf[0] == 'b') {
+						fcntl(data->canal, F_SETFL, 0);
+						recvCli(data->canal, buf + 1);
 						sscanf(buf+2, "%f", &prix_prop);
-printf("worker %d: client bid: %f bid: %f prix cur: %f\n", data->tid, prix_prop, bid, curObj->prix_cur);
 						if (bid == curObj->prix_cur && prix_prop > bid) { //no previous bet unprocessed
 							bid = prix_prop;
 							bidder = data->tid;

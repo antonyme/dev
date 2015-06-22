@@ -50,22 +50,10 @@ void sendCli (int sd, const char* format, ...) {
 	if (ret == -1) {
 		erreur_IO("ecrireLigne");
 	}
-
-	while ((ret = lireLigne(sd, buf)) == 0);
-	if (ret == -1) {
-		erreur_IO("lireLigne");
-	}
-	else if (ret == LIGNE_MAX) {
-		erreur("line too long\n");
-	}
-	if (strcmp(buf, "OK") != 0) {
-		erreur("bad answer from client: %s\n", buf);
-	}
 }
 
 void recvCli (int sd, char* buf) {
 	int ret;
-	char bufRep[LIGNE_MAX] = "OK";
 	
 	while ((ret = lireLigne(sd, buf)) == 0);
 	if (ret == -1) {
@@ -73,9 +61,5 @@ void recvCli (int sd, char* buf) {
 	}
 	else if (ret == LIGNE_MAX) {
 		erreur("line too long");
-	}
-	ret = ecrireLigne(sd, bufRep);
-	if (ret == -1) {
-		erreur_IO("ecrireLigne");
 	}
 }
