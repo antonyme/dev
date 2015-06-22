@@ -44,6 +44,7 @@ void sendServ (int sd, const char* format, ...) {
 	va_start(args, format);
 	vsnprintf(buf, LIGNE_MAX, format, args);
 	va_end (args);
+	printf("IO: send: %s\n", buf);
 	ret = ecrireLigne(sd, buf);
 	if (ret == -1) {
 		erreur_IO("ecrireLigne");
@@ -66,6 +67,7 @@ void recvServ (int sd, char* buf) {
 	char bufRep[LIGNE_MAX] = "OK";
 	
 	while ((ret = lireLigne(sd, buf)) == 0);
+	printf("IO: recv: %s\n", buf);
 	if (ret == -1) {
 		erreur_IO("lireLigne");
 	}

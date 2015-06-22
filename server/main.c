@@ -32,6 +32,8 @@ int main(int argc, char *argv[]) {
 	masterSd = createEcoute(argv[1]);
 	
 	while (VRAI) {
+		sleep(1);
+		
 		//clear the socket set
 		FD_ZERO(&readfds);
 		
@@ -86,17 +88,17 @@ int main(int argc, char *argv[]) {
 			
 			printf("%s: worker %d choisi\n", CMD, i);
 		}
-		
-		//else it's IO on an other socket
-		clientMessage = VRAI;
-		for(i = 0; i<NTHREADS; i++) {
-			if(FD_ISSET(cohorte[i].canal, &readfds)) {
-
-				//wake worker for IO
-				if (sem_post(&cohorte[i].sem) == -1) {
-					erreur_IO("sem_post");
+		else { //else it's IO on an other socket
+			clientMessage = VRAI;
+			for(i = 0; i<NTHREADS; i++) {
+				if(FD_ISSET(cohorte[i].canal, &readfds)) {
+printf("server: waking worker %d\n", i);
+					//wake worker for IO
+					if (sem_post(&cohorte[i].sem) == -1) {
+						erreur_IO("sem_post");
+					}
 				}
-			}
+			}	
 		}
 	}
 	

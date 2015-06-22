@@ -60,23 +60,24 @@ int main(int argc, char *argv[]) {
 
 			//wait
 			activity = select(sd+1, &readfds, NULL, NULL, &tv);
+/**********/printf("debug: select return %d\n", activity);
 			if(activity != 0) { //server message
 				recvServ(sd, buf);
 			}
 			else { //select timed out
 				sendServ(sd, "b %f", myInfos.prix_prop);
 				recvServ(sd, buf);
-				if (strcmp(buf, "accepted")) {
+				if (strcmp(buf, "accepted") == 0) {
 					printf("%s: enchere au prix %f accepte\n", CMD, myInfos.prix_prop);
 					continue;
 				}
 			}
 			
 			//process server message
-			if (strcmp(buf, "end object")) {
+			if (strcmp(buf, "end object") == 0) {
 				break;
 			}
-			else if (strcmp(buf, "end")) {
+			else if (strcmp(buf, "end") == 0) {
 				stay = FAUX;
 				break;
 			}

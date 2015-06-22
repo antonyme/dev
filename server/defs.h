@@ -15,7 +15,7 @@ int clientMessage, endObj, end;
 int nbClients;
 int clients[NTHREADS];
 int nbObjs;
-OBJET objs[TMAX], curObj;
+OBJET objs[TMAX], *curObj;
 
 float bid;
 int bidder;

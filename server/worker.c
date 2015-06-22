@@ -9,7 +9,7 @@
 #include "clientIO.h"
 
 void *traiterRequete (void *arg) {
-	int i, ret, stay = VRAI;
+	int i, ret, stay = VRAI, lastPrice;
 	float prix_prop;
 	DataSpec * data = (DataSpec *) arg;
 	char buf[LIGNE_MAX];
@@ -44,8 +44,9 @@ void *traiterRequete (void *arg) {
 			}
 			
 			//send object
-			printf("worker %d: send object infos: %s\n", data->tid, curObj.nom);
-			sendCli(data->canal, "o %s %f %f %c %d", curObj.nom, curObj.prix_ini, curObj.prix_cur, curObj.type, curObj.rare);
+			printf("worker %d: send object infos: %s\n", data->tid, curObj->nom);
+			sendCli(data->canal, "o %s %f %f %c %d", curObj->nom, curObj->prix_ini, curObj->prix_cur, curObj->type, curObj->rare);
+			lastPrice = curObj->prix_ini;
 			
 			while(VRAI) {
 				
@@ -53,12 +54,12 @@ void *traiterRequete (void *arg) {
 				if (sem_wait(&data->sem) == -1) {
 					erreur_IO("sem_post");
 				}
-				
+printf("worker %d: woke\n", data->tid);
 				//lock bid
 				if (pthread_mutex_lock (&mutexBid) != 0) {
 					erreur_IO ("mutex_lock");
 				}
-				
+printf("worker %d: lock\n", data->tid);
 				//woke by auctioneer
 				if (end) {
 					sendCli(data->canal, "end");
@@ -69,7 +70,9 @@ void *traiterRequete (void *arg) {
 					sendCli(data->canal, "end object");
 					break;
 				}
-				if (bid != curObj.prix_cur) { //new price
+				if (bid != lastPrice) { //new price
+printf("worker %d: send new price : %f\n", data->tid, bid);
+					lastPrice = bid;
 					sendCli(data->canal, "n %f", bid);
 				}
 				
@@ -77,10 +80,13 @@ void *traiterRequete (void *arg) {
 				if (clientMessage) {
 					clientMessage = FAUX;
 					recvCli(data->canal, buf);
+printf("worker %d: client bid: %s\n", data->tid, buf);
 					if (buf[0] == 'b') { //new bid
 						sscanf(buf+2, "%f", &prix_prop);
-						if (bid == curObj.prix_cur && prix_prop > bid) { //no previous bet unprocessed
+printf("worker %d: client bid: %f bid: %f prix cur: %f\n", data->tid, prix_prop, bid, curObj->prix_cur);
+						if (bid == curObj->prix_cur && prix_prop > bid) { //no previous bet unprocessed
 							bid = prix_prop;
+							bidder = data->tid;
 							sendCli(data->canal, "accepted");
 							
 							//wake auctioneer
