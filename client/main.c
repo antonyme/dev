@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 					continue;
 				}
 				else {
-					printf("%s: enchere au prix %f refuse: autre reponse: %s\n", CMD, myInfos.prix_prop, buf);
+					printf("%s: enchere refuse\n", CMD);
 				}
 			}
 			
@@ -96,6 +96,9 @@ int main(int argc, char *argv[]) {
 				sscanf(buf+2, "%f", &toBuy.prix_cur);
 				lastBid = FAUX;
 				printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
+			}
+			else {
+				erreur("wrong message from server: %s\n", buf);
 			}
 		}
 		

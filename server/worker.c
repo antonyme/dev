@@ -78,11 +78,10 @@ void *traiterRequete (void *arg) {
 				//woke by server
 				if (clientMessage) {
 					clientMessage = FAUX;
-					fcntl(data->canal, F_SETFL, O_NONBLOCK);
-					if(read(data->canal, buf, 1) == 1 && buf[0] == 'b') {
-						fcntl(data->canal, F_SETFL, 0);
-						recvCli(data->canal, buf + 1);
+					recvCli(data->canal, buf);
+					if (buf[0] == 'b') {
 						sscanf(buf+2, "%f %f", &prix_prop, &prix_connu);
+						
 						if (bid == prix_connu && prix_prop > bid) { //no previous bet unprocessed by client
 							bid = lastPrice = prix_prop;
 							bidder = data->tid;
@@ -91,6 +90,9 @@ void *traiterRequete (void *arg) {
 							//wake auctioneer
 							pthread_cond_signal(&condBid);
 						}
+					}
+					else {
+						erreur("wrong message from client: %s\n", buf);
 					}
 				}
 				
