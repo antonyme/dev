@@ -9,8 +9,8 @@
 #include "clientIO.h"
 
 void *traiterRequete (void *arg) {
-	int i, ret, stay = VRAI, lastPrice;
-	float prix_prop;
+	int i, ret, stay = VRAI;
+	float prix_prop, prix_connu, lastPrice;
 	DataSpec * data = (DataSpec *) arg;
 	char buf[LIGNE_MAX];
 	
@@ -82,9 +82,9 @@ void *traiterRequete (void *arg) {
 					if(read(data->canal, buf, 1) == 1 && buf[0] == 'b') {
 						fcntl(data->canal, F_SETFL, 0);
 						recvCli(data->canal, buf + 1);
-						sscanf(buf+2, "%f", &prix_prop);
-						if (bid == curObj->prix_cur && prix_prop > bid) { //no previous bet unprocessed
-							bid = prix_prop;
+						sscanf(buf+2, "%f %f", &prix_prop, &prix_connu);
+						if (bid == prix_connu && prix_prop > bid) { //no previous bet unprocessed by client
+							bid = lastPrice = prix_prop;
 							bidder = data->tid;
 							sendCli(data->canal, "accepted");
 							

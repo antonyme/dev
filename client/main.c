@@ -71,15 +71,16 @@ int main(int argc, char *argv[]) {
 				recvServ(sd, buf);
 			}
 			else { //select timed out
-				sendServ(sd, "b %f", myInfos.prix_prop);
+				sendServ(sd, "b %f %f", myInfos.prix_prop, toBuy.prix_cur);
 				recvServ(sd, buf);
 				if (strcmp(buf, "accepted") == 0) {
-					printf("%s: enchere au prix %f accepte\n", CMD, myInfos.prix_prop);
+					printf("%s: enchere accepte\n", CMD);
+					toBuy.prix_cur = myInfos.prix_prop;
 					lastBid = VRAI;
 					continue;
 				}
 				else {
-					printf("%s: enchere au prix %f refuse: autre reponse\n", CMD, myInfos.prix_prop);
+					printf("%s: enchere au prix %f refuse: autre reponse: %s\n", CMD, myInfos.prix_prop, buf);
 				}
 			}
 			
@@ -93,13 +94,8 @@ int main(int argc, char *argv[]) {
 			}
 			else if (buf[0] == 'n') { //new price
 				sscanf(buf+2, "%f", &toBuy.prix_cur);
-				if (toBuy.prix_cur == myInfos.prix_prop) {
-					lastBid = VRAI;
-				}
-				else {
-					lastBid = FAUX;
-					printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
-				}
+				lastBid = FAUX;
+				printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
 			}
 		}
 		

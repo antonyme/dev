@@ -5,16 +5,10 @@
 #include "defs.h"
 #include "auction.h"
 
-
-void testHang (ACHETEUR *monsieurx, OBJET *bidule) {
-	monsieurx->latence = rand_a_b(5, 15);
-	monsieurx->prix_prop = bidule->prix_cur + rand_a_b(100, 1000);
-}
-
  //pour UN client, la fonction fglobale va l'affilier à une fonction en fonction de son caractère
 void getHangTime (ACHETEUR *monsieurx, OBJET *bidule)
 {
-	printf("%s\n", monsieurx->personnalite);
+	
 	if (strcmp((monsieurx->personnalite), "oisif")==0)  // si je compare monsieurx->personnalite c'est une adresse.
 		foisif(monsieurx, bidule);
 
