@@ -10,11 +10,12 @@
 void *createAuctioneer () {
 	int i, ret, lastBidder[TMAX];
 	
-	sleep(60);
+	memset(lastBidder, -1, sizeof(lastBidder));
+	sleep(15);
 	printf("commissaire: lancement de la vente des %d objets choisis\n", nbObjs);
 	
 	//init barrier
-	if (pthread_barrier_init(&auctionStart, NULL, nbClients) != 0) {
+	if (pthread_barrier_init(&auctionStart, NULL, nbClients + 1) != 0) {
 		erreur_IO ("barrier_init");
 	}
 	
@@ -27,7 +28,8 @@ void *createAuctioneer () {
 		bid = curObj.prix_cur = curObj.prix_ini;
 		
 		//barrier (wait clients)
-		if (pthread_barrier_wait(&auctionStart) != 0) {
+		ret = pthread_barrier_wait(&auctionStart);
+		if (ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD) {
 			erreur_IO ("barrier_wait");
 		}
 		
@@ -36,10 +38,10 @@ void *createAuctioneer () {
 			erreur_IO ("mutex_lock");
 		}
 		
-		endObj = FAUX
+		endObj = FAUX;
 		
 		while (VRAI) {
-			printf("commissaire: mise en vente de l'objet %s à %f\n", obj.nom, obj.prix_cur);
+			printf("commissaire: mise en vente de l'objet %s à %f\n", curObj.nom, curObj.prix_cur);
 			ret = waitBid();
 			if (ret == 0) { //signaled (bid from client)
 				curObj.prix_cur = bid;
@@ -47,9 +49,9 @@ void *createAuctioneer () {
 			}
 			else if (ret == ETIMEDOUT) { //timed out (no new bid)
 				if (lastBidder[i] == -1)
-					printf("commissaire: pas d'acheteur pour l'objet %s\n", obj.nom);
+					printf("commissaire: pas d'acheteur pour l'objet %s\n", curObj.nom);
 				else
-					printf("commissaire: objet %s vendu pour %f au client du worker %d\n", obj.nom, obj.prix_cur, lastBidder[i]);
+					printf("commissaire: objet %s vendu pour %f au client du worker %d\n", curObj.nom, curObj.prix_cur, lastBidder[i]);
 				endObj = VRAI;
 				break;
 			}

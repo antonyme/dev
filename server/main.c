@@ -3,6 +3,7 @@
 */
 #include "pse.h"
 #include "defs.h"
+#include "main.h"
 #include "clientIO.h"
 #include "worker.h"
 #include "auctioneer.h"
@@ -112,7 +113,7 @@ void init () {
 	memset(objs, 0, sizeof(objs));
 	
 	bid = 0;
-	int bidder = -1;
+	bidder = -1;
 	
 	if (sem_init(&semWork, 0, NTHREADS) == -1) {
 		erreur_IO("sem_init");

@@ -9,7 +9,7 @@
 #include "fileIO.h"
 
 int main(int argc, char *argv[]) {
-	int sd, stay = VRAI, lastBid = FAUX;
+	int sd, activity, stay = VRAI, lastBid = FAUX;
 	char buf[LIGNE_MAX];
 	ACHETEUR myInfos;
 	OBJET toBuy;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 		sscanf(buf+2, "%s %f %f %c %d", toBuy.nom, &toBuy.prix_ini, &toBuy.prix_cur, &toBuy.type, &toBuy.rare);
 		printf("%s: objet %s mis en vente au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
 		
-		while 1 {
+		while (VRAI) {
 			
 			//set hang time
 			if (lastBid) { //no double bid
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 				myInfos.latence = LATMAX;
 			}
 			else getHangTime(&myInfos, &toBuy);
-			tv.tv_sec = (int)myInfos.latence
+			tv.tv_sec = (int)myInfos.latence;
 			tv.tv_usec = 0;
 			if(tv.tv_sec == LATMAX)
 				printf("%s: non interesse\n", CMD);
@@ -59,15 +59,15 @@ int main(int argc, char *argv[]) {
 				printf("%s: decide de monter a %f au bout de %f secondes\n", CMD, myInfos.prix_prop, myInfos.latence);
 
 			//wait
-			activity = select(sd+1, &readfds, NULL, NULL, &tv)
+			activity = select(sd+1, &readfds, NULL, NULL, &tv);
 			if(activity != 0) { //server message
 				recvServ(sd, buf);
 			}
 			else { //select timed out
-				sendServ(sd, "b %f", toBuy.prix_prop);
+				sendServ(sd, "b %f", myInfos.prix_prop);
 				recvServ(sd, buf);
-				if (strcmp(buf, "accepted") {
-					printf("%s: enchere au prix %f accepte\n", CMD, toBuy.prix_prop);
+				if (strcmp(buf, "accepted")) {
+					printf("%s: enchere au prix %f accepte\n", CMD, myInfos.prix_prop);
 					continue;
 				}
 			}
@@ -80,9 +80,9 @@ int main(int argc, char *argv[]) {
 				stay = FAUX;
 				break;
 			}
-			else if (buf[0] = 'n') { //new price
+			else if (buf[0] == 'n') { //new price
 				sscanf(buf+2, "%f", &toBuy.prix_cur);
-				if (toBuy.prix_cur == toBuy.prix_prop) lastBid = VRAI;
+				if (toBuy.prix_cur == myInfos.prix_prop) lastBid = VRAI;
 				printf("%s: l'objet %s est monte au prix %f\n", CMD, toBuy.nom, toBuy.prix_cur);
 			}
 		}

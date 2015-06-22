@@ -9,7 +9,7 @@
 #include "clientIO.h"
 
 void *traiterRequete (void *arg) {
-	int stay = VRAI;
+	int i, ret, stay = VRAI;
 	float prix_prop;
 	DataSpec * data = (DataSpec *) arg;
 	char buf[LIGNE_MAX];
@@ -36,19 +36,16 @@ void *traiterRequete (void *arg) {
 			erreur_IO("sem_wait");
 		}
 		
-		while (stay) {
-			
+		while (stay) {		
 			//barrier
-			if (pthread_barrier_wait(&auctionStart) != 0) {
+			ret = pthread_barrier_wait(&auctionStart);
+			if (ret != 0 && ret != PTHREAD_BARRIER_SERIAL_THREAD) {
 				erreur_IO ("barrier_wait");
 			}
 			
 			//send object
 			printf("worker %d: send object infos: %s\n", data->tid, curObj.nom);
 			sendCli(data->canal, "o %s %f %f %c %d", curObj.nom, curObj.prix_ini, curObj.prix_cur, curObj.type, curObj.rare);
-			if (sem_post(&semNewObj) == -1) {
-				erreur_IO("sem_post");
-			}
 			
 			while(VRAI) {
 				
@@ -72,7 +69,7 @@ void *traiterRequete (void *arg) {
 					sendCli(data->canal, "end object");
 					break;
 				}
-				if (bid != obj.prix_cur) { //new price
+				if (bid != curObj.prix_cur) { //new price
 					sendCli(data->canal, "n %f", bid);
 				}
 				
@@ -82,7 +79,7 @@ void *traiterRequete (void *arg) {
 					recvCli(data->canal, buf);
 					if (buf[0] == 'b') { //new bid
 						sscanf(buf+2, "%f", &prix_prop);
-						if (bid == obj.prix_cur && prix_prop > bid) { //no previous bet unprocessed
+						if (bid == curObj.prix_cur && prix_prop > bid) { //no previous bet unprocessed
 							bid = prix_prop;
 							sendCli(data->canal, "accepted");
 							
