@@ -68,6 +68,7 @@ void *traiterRequete (void *arg) {
 				}
 				if (endObj) {
 					sendCli(data->canal, "end object");
+					printf("worker %d: sending end object\n", data->tid);
 					break;
 				}
 				if (bid != lastPrice) { //new price
@@ -101,9 +102,13 @@ void *traiterRequete (void *arg) {
 					erreur_IO ("mutex_unlock");
 				}
 			}
+			//unlock bid
+			if (pthread_mutex_unlock (&mutexBid) != 0) {
+				erreur_IO ("mutex_unlock");
+			}
 		}
 		
-		sendCli(data->canal, "f");	
+		printf("worker %d: closing connection\n", data->tid);
 		if (close(data->canal) == -1) {
 			erreur_IO("close");
 		}

@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
+	printf("%s: fin d'enchère\n", CMD);
 	if (close(sd) == -1) {
 		erreur_IO("close");
 	}

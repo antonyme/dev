@@ -60,14 +60,15 @@ void *createAuctioneer () {
 			else {
 				fprintf(stderr, "pthread_cond_timedwait: %d", ret);
 			}
-			if (pthread_mutex_unlock (&mutexBid) != 0) {
-				erreur_IO ("mutex_unlock");
-			}
 			wakeClients();
+		}
+		if (pthread_mutex_unlock (&mutexBid) != 0) {
+			erreur_IO ("mutex_unlock");
 		}
 	}
 	end = VRAI;
 	printf("commissaire: fin de la vente\n");
+	wakeClients();
 	
 	pthread_exit(NULL);
 }
