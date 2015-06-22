@@ -32,24 +32,24 @@ void getHangTime (ACHETEUR *monsieurx, OBJET *bidule)
 
 //************* fonctions qui permettent de déterminer le temps de latence *********************************
 
-double alea(double inf, double sup){
-	 return ( rand()/(double)RAND_MAX ) * (sup-inf) + inf;
-}
 
-
-int rand_a_b(int min, int max){
-    return rand() % (max - min) + min;
+float rand_a_b(float min, float max){
+	return ( (float)rand()/RAND_MAX ) * (max - min) + min;
 }
 
 
 void foisif (ACHETEUR *monsieurx, OBJET *bidule)
 {
-	if ( ((bidule->type=='B'&& monsieurx->possession_B<=3) || (bidule->type=='V'&& monsieurx->possession_V<=3) || (bidule->type=='M'&& monsieurx->possession_M<=3) ) && monsieurx->argent_cur >= (bidule->prix_cur)*2 && bidule->prix_cur <=2*(bidule->prix_ini) )
+	if ( ((bidule->type=='B'&& monsieurx->possession_B<=3) || 
+			(bidule->type=='V'&& monsieurx->possession_V<=3) || 
+			(bidule->type=='M'&& monsieurx->possession_M<=3) ) && 
+			monsieurx->argent_cur >= 2*bidule->prix_cur && 
+			bidule->prix_cur <= 2*(bidule->prix_ini) )
 	{
 		monsieurx->latence = rand_a_b(6, 10);
 		monsieurx->prix_prop = bidule->prix_cur + 0.4*(bidule->prix_cur);
 	}
-	else {monsieurx->latence = LATMAX;}
+	else monsieurx->latence = LATMAX;
 }
 
 void fcollectionneur (ACHETEUR *monsieurx, OBJET *bidule)
@@ -101,34 +101,16 @@ void flambda (ACHETEUR *monsieurx, OBJET *bidule)
 void fjoueur (ACHETEUR *monsieurx, OBJET *bidule)
 {
 	char rep;
-	printf("le prix actuel de l'objet est %f\n Voulez-vous proposer un nouveau prix?\n Repondre par o ou n: \n", bidule->prix_cur);
+	printf("Voulez-vous proposer un nouveau prix?\n Repondre par o ou n: \n> ");
 	scanf(" %c", &rep);
 	if (rep =='o')
 	{
 		printf("Quel nouveau prix proposez-vous?\n");
 		scanf("%f", &monsieurx->prix_prop);
-		if (monsieurx->prix_prop > bidule->prix_cur)
-		{
-		printf("le prix propose par Monsieur %s est %f\n", monsieurx->nom, monsieurx->prix_prop);
-		traitementjoueur(monsieurx, bidule);
-		}
-		else if (monsieurx->prix_prop <= bidule->prix_cur)
-			{
-			printf("le prix que vous proposez est inferieur ou egal au prix actuel.\n");
-			monsieurx->latence = LATMAX;
-			}
+		monsieurx->latence = 0;
 	}
 	else
 	{
 		monsieurx->latence = LATMAX;
-		printf("l'objet %s n'interesse pas Monsieur %s \n", bidule->nom, monsieurx->nom);
 	}
-}
-
-
-void traitementjoueur (ACHETEUR *monsieurx, OBJET *bidule)
-{
-	if (monsieurx->prix_prop <= 3*(bidule->prix_cur))
-		monsieurx->latence = 10*((monsieurx->prix_prop - bidule->prix_cur)/(bidule->prix_cur));
-	else monsieurx->latence = rand_a_b (1,10);
 }
