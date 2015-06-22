@@ -44,7 +44,6 @@ void *traiterRequete (void *arg) {
 			}
 			
 			//send object
-			printf("worker %d: send object infos: %s\n", data->tid, curObj->nom);
 			sendCli(data->canal, "o %s %f %f %c %d", curObj->nom, curObj->prix_ini, curObj->prix_cur, curObj->type, curObj->rare);
 			lastPrice = curObj->prix_ini;
 			
@@ -54,12 +53,10 @@ void *traiterRequete (void *arg) {
 				if (sem_wait(&data->sem) == -1) {
 					erreur_IO("sem_wait");
 				}
-				
 				//lock bid
 				if (pthread_mutex_lock (&mutexBid) != 0) {
 					erreur_IO ("mutex_lock");
 				}
-				
 				//woke by auctioneer
 				if (end) {
 					sendCli(data->canal, "end");
@@ -68,7 +65,6 @@ void *traiterRequete (void *arg) {
 				}
 				if (endObj) {
 					sendCli(data->canal, "end object");
-					printf("worker %d: sending end object\n", data->tid);
 					break;
 				}
 				if (bid != lastPrice) { //new price
@@ -79,7 +75,11 @@ void *traiterRequete (void *arg) {
 				//woke by server
 				if (clientMessage) {
 					clientMessage = FAUX;
-					recvCli(data->canal, buf);
+					if (readWouldBlock(data->canal, buf)) {
+						printf("\t\t%d : WBLOCK\n", data->tid);
+						continue;
+					}
+					recvCli(data->canal, buf + 1);
 					if (buf[0] == 'b') {
 						sscanf(buf+2, "%f %f", &prix_prop, &prix_connu);
 						
@@ -96,7 +96,6 @@ void *traiterRequete (void *arg) {
 						erreur("wrong message from client: %s\n", buf);
 					}
 				}
-				
 				//unlock bid
 				if (pthread_mutex_unlock (&mutexBid) != 0) {
 					erreur_IO ("mutex_unlock");

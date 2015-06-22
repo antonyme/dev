@@ -63,3 +63,13 @@ void recvCli (int sd, char* buf) {
 		erreur("line too long");
 	}
 }
+
+int readWouldBlock (int sd, char* buf) {
+	int ret;
+	
+	fcntl(sd, F_SETFL, O_NONBLOCK);
+	if (read(sd, buf, 1) == 1) ret = 0;
+	else ret = 1;
+	fcntl(sd, F_SETFL, 0);
+	return ret;
+}

@@ -19,4 +19,10 @@ void sendCli (int sd, const char* format, ...);
  */
 void recvCli (int sd, char* buf);
 
+/*
+ * Test si une lecture sur sd serait bloquante. Pour cela lit le premier charctère et
+ * le place en buf[0]
+ */
+int readWouldBlock (int sd, char* buf);
+
 #endif
