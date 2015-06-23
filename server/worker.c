@@ -75,10 +75,7 @@ void *traiterRequete (void *arg) {
 				//woke by server
 				if (clientMessage) {
 					clientMessage = FAUX;
-					if (readWouldBlock(data->canal, buf)) {
-						printf("\t\t%d : WBLOCK\n", data->tid);
-					}
-					else {
+					if (!readWouldBlock(data->canal, buf)) {
 						recvCli(data->canal, buf + 1);
 						if (buf[0] == 'b') {
 							sscanf(buf+2, "%f %f", &prix_prop, &prix_connu);

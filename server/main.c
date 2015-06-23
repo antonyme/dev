@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 	init();
 	fillAllObjs();
 	createCohorte();
-	if ((ret = pthread_create(&auctId, NULL, createAuctioneer, NULL)) != 0) {
+	if (pthread_create(&auctId, NULL, createAuctioneer, NULL) != 0) {
 		erreur_IO("pthread_create");
 	}
 	masterSd = createEcoute(argv[1]);
