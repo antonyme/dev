@@ -97,7 +97,7 @@ void flambda (ACHETEUR *monsieurx, OBJET *bidule)
 		monsieurx->argent_cur >= (bidule->prix_cur)*2 && 
 		bidule->prix_cur <= 3*(bidule->prix_ini))
 	{
-		monsieurx->latence = rand_a_b(3,10);
+		monsieurx->latence = /*rand_a_b(3,10)*/ 7.24;
 		monsieurx->prix_prop = bidule->prix_cur + rand_a_b(0.2,0.4)*(bidule->prix_cur);
 	}
 	else {monsieurx->latence = LATMAX;}

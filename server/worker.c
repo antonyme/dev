@@ -77,23 +77,24 @@ void *traiterRequete (void *arg) {
 					clientMessage = FAUX;
 					if (readWouldBlock(data->canal, buf)) {
 						printf("\t\t%d : WBLOCK\n", data->tid);
-						continue;
-					}
-					recvCli(data->canal, buf + 1);
-					if (buf[0] == 'b') {
-						sscanf(buf+2, "%f %f", &prix_prop, &prix_connu);
-						
-						if (bid == prix_connu && prix_prop > bid) { //no previous bet unprocessed by client
-							bid = lastPrice = prix_prop;
-							bidder = data->tid;
-							sendCli(data->canal, "accepted");
-							
-							//wake auctioneer
-							pthread_cond_signal(&condBid);
-						}
 					}
 					else {
-						erreur("wrong message from client: %s\n", buf);
+						recvCli(data->canal, buf + 1);
+						if (buf[0] == 'b') {
+							sscanf(buf+2, "%f %f", &prix_prop, &prix_connu);
+							
+							if (bid == prix_connu && prix_prop > bid) { //no previous bet unprocessed by client
+								bid = lastPrice = prix_prop;
+								bidder = data->tid;
+								sendCli(data->canal, "accepted");
+								
+								//wake auctioneer
+								pthread_cond_signal(&condBid);
+							}
+						}
+						else {
+							erreur("wrong message from client: %s\n", buf);
+						}
 					}
 				}
 				//unlock bid
